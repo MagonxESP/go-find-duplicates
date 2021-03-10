@@ -14,7 +14,7 @@ type DuplicatesFinder struct {
 	duplicates []string
 }
 
-func (d DuplicatesFinder) find() error {
+func (d *DuplicatesFinder) find() error {
 	filesA, err := ScanDir(d.directoryA)
 
 	if err != nil {

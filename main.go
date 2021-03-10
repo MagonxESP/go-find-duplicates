@@ -21,8 +21,7 @@ func findDuplicates() error {
 
 	count := len(finder.duplicates)
 
-	fmt.Println(fmt.Sprintf("Found %d files duplicated on directory %s and subdirectories", count, dirB))
-
+	fmt.Println(fmt.Sprintf("Found %d files of %s duplicated on directory %s and subdirectories", count, dirA, dirB))
 	return nil
 }
 
