@@ -3,45 +3,60 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
 )
 
 type DuplicatesFinder struct {
-	directoryA []os.DirEntry
-	directoryB []os.DirEntry
-	duplicates []os.File
+	directoryA string
+	directoryB string
+	duplicates []string
 }
 
-func (d DuplicatesFinder) find() {
-	for _, file := range d.directoryA {
+func (d DuplicatesFinder) find() error {
+	filesA, err := ScanDir(d.directoryA)
 
+	if err != nil {
+		return err
 	}
+
+	err = filepath.WalkDir(d.directoryB, func(path string, fileB fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		for _, file := range filesA {
+			if !fileB.IsDir() && fileB.Name() == file.Name() {
+				fmt.Println(fmt.Sprintf("%s duplicated on %s", file.Name(), path))
+				d.duplicates = append(d.duplicates, path)
+			}
+		}
+
+		return nil
+	})
+
+	return err
 }
 
-func NewDuplicatesFinder(directoryA string, directoryB string) (DuplicatesFinder, error) {
-	filesA, err := Read(directoryA)
+func NewDuplicatesFinder(directoryA string, directoryB string) (*DuplicatesFinder, error) {
+	for _, path := range []string{directoryA, directoryB} {
+		err := IsValidPath(path)
 
-	if err != nil {
-		return DuplicatesFinder{}, err
-	}
-
-	filesB, err := Read(directoryB)
-
-	if err != nil {
-		return DuplicatesFinder{}, err
+		if err != nil {
+			return &DuplicatesFinder{}, err
+		}
 	}
 
 	instance := DuplicatesFinder{}
-	instance.directoryA = filesA
-	instance.directoryB = filesB
+	instance.directoryA = directoryA
+	instance.directoryB = directoryB
 
-	return instance, nil
+	return &instance, nil
 }
 
-func Read(directory string) ([]os.DirEntry, error) {
-	err := IsValid(directory)
-
-	if err != nil {
+func ScanDir(directory string) ([]os.DirEntry, error) {
+	if err := IsValidPath(directory); err != nil {
 		return []os.DirEntry{}, err
 	}
 
@@ -54,15 +69,15 @@ func Read(directory string) ([]os.DirEntry, error) {
 	return files, nil
 }
 
-func IsValid(directory string) error {
-	info, err := os.Stat(directory)
+func IsValidPath(path string) error {
+	info, err := os.Stat(path)
 
 	if err != nil {
 		return err
 	}
 
 	if !info.IsDir() {
-		return errors.New(fmt.Sprintf("The path %s is not a directory", directory))
+		return errors.New(fmt.Sprintf("The path %s is not a directory", path))
 	}
 
 	return nil
