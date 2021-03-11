@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 func findDuplicates(dirA string, dirB string) error {
@@ -23,6 +24,7 @@ func findDuplicates(dirA string, dirB string) error {
 }
 
 func main() {
+	start := time.Now()
 	args := os.Args[1:]
 
 	if len(args) < 2 {
@@ -38,4 +40,7 @@ func main() {
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error: %s", err.Error()))
 	}
+
+	elapsed := time.Since(start)
+	fmt.Println(fmt.Sprintf("Execution time: %s", elapsed))
 }
