@@ -39,6 +39,7 @@ func main() {
 
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error: %s", err.Error()))
+		return
 	}
 
 	elapsed := time.Since(start)
