@@ -5,10 +5,7 @@ import (
 	"os"
 )
 
-func findDuplicates() error {
-	dirA := os.Args[1:][0]
-	dirB := os.Args[1:][1]
-
+func findDuplicates(dirA string, dirB string) error {
 	finder, err := NewDuplicatesFinder(dirA, dirB)
 
 	if err != nil {
@@ -26,7 +23,17 @@ func findDuplicates() error {
 }
 
 func main() {
-	err := findDuplicates()
+	args := os.Args[1:]
+
+	if len(args) < 2 {
+		fmt.Println("Missing required arguments <directoryA> <directoryB>")
+		return
+	}
+
+	dirA := args[0]
+	dirB := args[1]
+
+	err := findDuplicates(dirA, dirB)
 
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error: %s", err.Error()))
